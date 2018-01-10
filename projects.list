@@ -1,1 +1,5 @@
 {
+  {name = "TabletOS",
+  description = {ru="ОС для планшетов.",en="OS for pads"},
+  raw="https://raw.githubusercontent.com/HeroBrine1st/TabletOS/master/VERSIONS.txt",}
+}
