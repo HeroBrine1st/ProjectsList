@@ -13,9 +13,10 @@ local prorepties = {
 	progressBarFull = "=",
 	projectsListUrl = "https://raw.githubusercontent.com/HeroBrine1st/UniversalInstaller/master/projects.list",
 }
-local language = "en"
+local language
 local languagePackages = {
 	en = {
+		full = "English",
 		error1 = "Sorry, but installer was crashed. Log:",
 		error2 = "Please send this log to developer.",
 		connecting = "CONNECTING",
@@ -24,13 +25,46 @@ local languagePackages = {
 		av1 = "Avaliable to install:",
 		av2 = "Write a number for install. Enter \"d\" before number for see description:",
 		assembling = "Assembling filelist. Please wait.",
-		startDownload = "Filelist assembling done. Downloading start.",
+		startDownload = "Filelist assembling done. Starting download.",
 		whatstreboot = "Success. Reboot now? [Y/N] "
+	},
+	ru = {
+		full = "Russian",
+		error1 = "Извините, но установщик вылетел. Вот журнал событий:",
+		error2 = "Отправьте этот журнал разработчику.",
+		connecting   = "ПОДКЛЮЧЕНИЕ ",
+		downloading  = "ЗАГРУЗКА    ",
+		downloadDone = "Завершено   ",
+		av1 = "Доступно для установки:",
+		av2 = "Введите номер для установки. Добавьте \"d\" перед числом, что бы посмотреть описание.",
+		assembling = "Собираю таблицу загрузки файлов. Пожалуйста, подождите.",
+		startDownload = "Таблица загрузки файлов собрана. Начинаю загрузку.",
+		whatstreboot = "Успешно. Перезагрузиться? [Y/N] ",
 	}
 }
 
-
-
+print("Select language:")
+local fgh = 0
+local languages = {}
+for key, value in pairs(languagePackages) do
+	fgh = fgh + 1
+	print(tostring(fgh) .. ") " .. value.full)
+	table.insert(languages,key)
+end
+io.write("Write a number for select language:")
+while not s do
+	local str = io.read()
+	if not str then os.exit() end
+	local number = tonumber(str)
+	if not number or number < 1 or number > #languages then
+		io.write("\nInvalid input, try again:") 
+	else
+		language = languages[number]
+		break
+	end
+end
+fgh = nil
+languages = nil
 local function writeLog(text)
 	log = log .. text .. "\n"
 end
@@ -106,6 +140,7 @@ local function download(url,path,buff)
 				end
 				io.write("\n")
 				reqH.close()
+				file:close()
 				if buff then return buffer end
 			else
 				error("Content-Length header absent. Error code: ERR_HEADER_ABSENT")
@@ -130,6 +165,8 @@ end
 io.write(languagePackages[language].av2)
 local s = false
 local raw = ""
+local scriptRaw
+local versionToInstall
 while not s do
 	local str = io.read()
 	if not str then os.exit() end
@@ -151,6 +188,8 @@ while not s do
 		else
 			s = true
 			raw = projectsList[number].raw
+			scriptRaw = projectsList[number].script
+			versionToInstall = projectsList[number].name
 		end
 	end
 end
@@ -190,7 +229,7 @@ while not su do
 		end
 	end
 end
-write("Version selected. Assembling filelist.")
+writeLog("Version selected. Assembling filelist.")
 print(languagePackages[language].assembling)
 local filelist = {}
 for i = 1, versionNumber do
@@ -215,7 +254,14 @@ for i = 1, #filelist do
 	local url = filelist[i].url
 	download(url,path)
 end
-
+if scriptRaw then
+	io.write("\n")
+	print("Processing script")
+	local scriptCode = download(scriptRaw,"/tmp/script.lua",true)
+	local scriptF, reason = load(scriptCode)
+	if not scriptF then error(reason) end
+	scriptF(versionToInstall)
+end
 io.write("\n" .. languagePackages[language].whatstreboot)
 local str = io.read()
-if str and not str == "" and str:sub(1,1):lower() == "y" then require("computer").reboot() end 
+if str:sub(1,1):lower() == "y" then require("computer").shutdown(true) end 
