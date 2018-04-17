@@ -3,7 +3,7 @@ local gpu = component.gpu
 local internet = component.internet
 local computer = require("computer")
 local text = require("text")
-local log = ""
+local log1 = ""
 local fs = require("filesystem")
 local origError = error
 local term = require("term")
@@ -66,7 +66,7 @@ end
 fgh = nil
 languages = nil
 local function writeLog(text)
-	log = log .. text .. "\n"
+	log1 = log1 .. text .. "\n"
 end
 
 local function write(text)
@@ -104,10 +104,11 @@ _ENV.error = function(reason,...)
 	gpu.setForeground(0xFFFFFF)
 	term.clear()
 	io.write("\n")
-	log = log .. "[FATAL ERROR!] " .. reason .. "\n"
+	writeLog("[FATAL ERROR!] " .. reason)
 	print(languagePackages[language].error1)
-	print(log)
+	print(log1)
 	print(languagePackages[language].error2)
+	print("\n\n\n\n")
 	os.exit()
 end
 
@@ -189,7 +190,6 @@ while not s do
 			s = true
 			raw = projectsList[number].raw
 			scriptRaw = projectsList[number].script
-			versionToInstall = projectsList[number].name
 		end
 	end
 end
@@ -200,7 +200,7 @@ if not versions then error(r) end
 versionsList = versions()
 print(languagePackages[language].av1)
 for i = 1, #versionsList do
-	print(tostring(i) .. ") " .. versionsList[i].version .. ((i == #versionsList and not versionsList[i].exp) and " LATEST STABLE" or (versionsList[i].exp and "DEV" or "")))
+	print(tostring(i) .. ") " .. versionsList[i].version .. ((i == #versionsList and not versionsList[i].exp) and " LATEST STABLE" or (versionsList[i].exp and " DEV" or "")))
 end
 io.write(languagePackages[language].av2)
 local su = false
@@ -229,6 +229,7 @@ while not su do
 		end
 	end
 end
+versionToInstall = versionsList[versionNumber].version
 writeLog("Version selected. Assembling filelist.")
 print(languagePackages[language].assembling)
 local filelist = {}
@@ -260,7 +261,7 @@ if scriptRaw then
 	local scriptCode = download(scriptRaw,"/tmp/script.lua",true)
 	local scriptF, reason = load(scriptCode)
 	if not scriptF then error(reason) end
-	scriptF(versionToInstall)
+	scriptF(tostring(versionToInstall))
 end
 io.write("\n" .. languagePackages[language].whatstreboot)
 local str = io.read()
