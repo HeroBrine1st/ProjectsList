@@ -65,9 +65,7 @@ while not s do
 end
 fgh = nil
 languages = nil
-local function writeLog(text)
-	log1 = log1 .. text .. "\n"
-end
+
 
 local function write(text)
   local _, y = term.getCursor()
@@ -99,7 +97,12 @@ local function shellProgressBar(file,progress)
 	write(text1)
 end
 
-_ENV.error = function(reason,...)
+local log1 = ""
+local function writeLog(text)
+	log1 = log1 .. text .. "\n"
+end
+
+error = function(reason,...)
 	gpu.setBackground(0x000000)
 	gpu.setForeground(0xFFFFFF)
 	term.clear()
@@ -253,6 +256,7 @@ print(languagePackages[language].startDownload)
 for i = 1, #filelist do
 	local path = filelist[i].path
 	local url = filelist[i].url
+	writeLog("Downloading " .. path .. " from " .. url)
 	download(url,path)
 end
 if scriptRaw then
@@ -261,7 +265,7 @@ if scriptRaw then
 	local scriptCode = download(scriptRaw,"/tmp/script.lua",true)
 	local scriptF, reason = load(scriptCode)
 	if not scriptF then error(reason) end
-	scriptF(tostring(versionToInstall))
+	scriptF(tostring(versionToInstall),versionNumber)
 end
 io.write("\n" .. languagePackages[language].whatstreboot)
 local str = io.read()
