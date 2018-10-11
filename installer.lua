@@ -15,10 +15,10 @@ local prorepties = {
 }
 local language
 local languagePackages = {
-	en = {
+	eu_EN = {
 		full = "English",
-		error1 = "Sorry, but installer was crashed. Log:",
-		error2 = "Please send this log to developer.",
+		error1 = "Installer was crashed. Logs:",
+		error2 = "Please send this logs to developer.",
 		connecting = "CONNECTING",
 		downloading = "DOWNLOADING",
 		downloadDone = "Download done",
@@ -28,9 +28,9 @@ local languagePackages = {
 		startDownload = "Filelist assembling done. Starting download.",
 		whatstreboot = "Success. Reboot now? [Y/N] "
 	},
-	ru = {
+	eu_RU = {
 		full = "Russian",
-		error1 = "Извините, но установщик вылетел. Вот журнал событий:",
+		error1 = "Установщик вылетел. Вот журнал событий:",
 		error2 = "Отправьте этот журнал разработчику.",
 		connecting   = "ПОДКЛЮЧЕНИЕ ",
 		downloading  = "ЗАГРУЗКА    ",
