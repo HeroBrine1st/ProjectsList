@@ -8,9 +8,11 @@ local fs = require("filesystem")
 local origError = error
 local term = require("term")
 local event = require("event")
+local gpu = require("component").gpu
+local theme = {back=0,fore=0xFFFFFF}
+local w,h = gpu.getResolution()
 local prorepties = {
 	progressBarLength = 15,
-	progressBarFull = "=",
 	projectsListUrl = "https://raw.githubusercontent.com/HeroBrine1st/UniversalInstaller/master/projects.list",
 }
 local language
@@ -66,11 +68,33 @@ end
 fgh = nil
 languages = nil
 
+local w,h = gpu.getResolution()
+local function drawBar(progress,filename)
+	if progress < 0 then return end
+	local str1 = text.padRight(tostring(tonumber(progress*100)).."%",4) .. " ["
+	local str3 = "] " .. filename
+	local progressLen = w-#str1-#str3
+	local barLen = progressLen*progress
+	gpu.set(1,h,str1)
+	gpu.set(#str1+progressLen+1,h,str3)
+	gpu.fill(#str1+1,h,progressLen,1,"⠠")
+	gpu.fill(#str1+1,h,barLen,1,"⠶")
+end
+local origPrint = print
+function print(...)
+	local x, y = term.getCursor()
+	if y == h then
+		gpu.copy(1,1,w,h-1,0,-1)
+		term.setCursor(x,y-1)
+		gpu.fill(1,h-1,w,1," ")
+	end
+	origPrint(...)
+end
 
 local function write(text)
   local _, y = term.getCursor()
-  term.setCursor(1, y)
-  term.write(text)
+  term.setCursor(1,y-1)
+  print(text)
 end
 
 local function getBar(progress)
@@ -88,13 +112,14 @@ end
 local function shellProgressBar(file,progress)
 	local text1 = ""
 	if progress == -1 then 
-		text1 = file .. " " .. " [" .. getBar(progress) .. "] 0%   " .. languagePackages[language].connecting
+		text1 = file .. ": 0%   " .. languagePackages[language].connecting
 	elseif progress >= 0 and progress < 100 then
-		text1 = file .. " [" .. getBar(progress) .. "] " .. text.padRight(tostring(progress) .. "%",4) .. " " .. languagePackages[language].downloading
+		text1 = file .. ": " .. text.padRight(tostring(progress) .. "%",4) .. " " .. languagePackages[language].downloading
 	elseif progress == 100 then
-		text1 = file .. " [" .. getBar(progress) .. "] 100%  " .. languagePackages[language].downloadDone
+		text1 = file .. ": 100% " .. languagePackages[language].downloadDone
 	end
 	write(text1)
+	drawBar(progress/100,file)
 end
 
 local log1 = ""
@@ -107,7 +132,7 @@ error = function(reason,...)
 	gpu.setForeground(0xFFFFFF)
 	term.clear()
 	io.write("\n")
-	writeLog("[FATAL ERROR!] " .. reason)
+	writeLog("[FATAL] " .. reason)
 	print(languagePackages[language].error1)
 	print(log1)
 	print(languagePackages[language].error2)
@@ -116,6 +141,7 @@ error = function(reason,...)
 end
 
 local function download(url,path,buff)
+	print("")
 	writeLog("Downloading " .. (buff and fs.name(path) or path) .. (buff and " to buffer" or ""))
 	fs.remove(path)
 	fs.makeDirectory(fs.path(path))
@@ -142,9 +168,9 @@ local function download(url,path,buff)
 					shellProgressBar(name,math.floor(downloadedLength/contentLength*100+0.5))
 					if buff then buffer = buffer .. data end
 				end
-				io.write("\n")
 				reqH.close()
 				file:close()
+				--gpu.fill(1,h,w,1," ")
 				if buff then return buffer end
 			else
 				error("Content-Length header absent. Error code: ERR_HEADER_ABSENT")
@@ -188,7 +214,7 @@ while not s do
 		if descView then
 			print("Description:")
 			print(projectsList[number].description[language])
-			io.write(languagePackages[language].av2)
+			print(languagePackages[language].av2)
 		else
 			s = true
 			raw = projectsList[number].raw
@@ -203,7 +229,7 @@ if not versions then error(r) end
 versionsList = versions()
 print(languagePackages[language].av1)
 for i = 1, #versionsList do
-	print(tostring(i) .. ") " .. versionsList[i].version .. ((i == #versionsList and not versionsList[i].exp) and " LATEST STABLE" or (versionsList[i].exp and " DEV" or "")))
+	print(tostring(i) .. ") " .. versionsList[i].version .. ((i == #versionsList and not versionsList[i].exp) and " // LATEST STABLE" or (versionsList[i].exp and " // WIP" or "")))
 end
 io.write(languagePackages[language].av2)
 local su = false
@@ -220,7 +246,7 @@ while not su do
 		number = tonumber(str)
 	end
 	if not number or number < 1 or number > #versionsList then
-		io.write("\nInvalid input, try again:") 
+		print("Invalid input, try again:") 
 	else
 		if descView then
 			print("Description:")
@@ -260,13 +286,15 @@ for i = 1, #filelist do
 	download(url,path)
 end
 if scriptRaw then
-	io.write("\n")
+	print("")
 	print("Processing script")
 	local scriptCode = download(scriptRaw,"/tmp/script.lua",true)
 	local scriptF, reason = load(scriptCode)
 	if not scriptF then error(reason) end
 	scriptF(tostring(versionToInstall),versionNumber)
 end
-io.write("\n" .. languagePackages[language].whatstreboot)
+gpu.fill(1,h,w,1," ")
+print = origPrint
+io.write(languagePackages[language].whatstreboot)
 local str = io.read()
 if str:sub(1,1):lower() == "y" then require("computer").shutdown(true) end 
