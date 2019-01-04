@@ -5,6 +5,6 @@
     script="https://raw.githubusercontent.com/HeroBrine1st/TabletOS/master/script.lua"},
   {name = "CryptedNote",
     description = {eu_RU="Утилита шифрования файлов с использованием сети Фейстеля",
-      eu_EN="File Encryption Utility with the Feistel Network"}
+      eu_EN="File Encryption Utility with the Feistel Network"},
     raw="https://raw.githubusercontent.com/HeroBrine1st/CryptedNote/master/VERSIONS.txt"},
 }
