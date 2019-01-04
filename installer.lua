@@ -126,17 +126,18 @@ local log1 = ""
 local function writeLog(text)
 	log1 = log1 .. text .. "\n"
 end
-
+prevErr = error
 error = function(reason,...)
 	gpu.setBackground(0x000000)
 	gpu.setForeground(0xFFFFFF)
 	term.clear()
 	io.write("\n")
-	writeLog("[FATAL] " .. reason)
+	writeLog("[FATAL] " .. tostring(reason))
 	print(languagePackages[language].error1)
 	print(log1)
 	print(languagePackages[language].error2)
 	print("\n\n\n\n")
+	error = prevErr
 	os.exit()
 end
 
