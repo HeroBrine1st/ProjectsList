@@ -32,7 +32,7 @@ local languagePackages = {
         downloading  = "ЗАГРУЗКА    ",
         downloadDone = "Завершено   ",
         av1 = "Доступно для установки:",
-        av0 = "Введите номер для установки."
+        av0 = "Введите номер для установки.",
         av2 = "Введите номер для установки. Добавьте \"d\" перед числом, что бы посмотреть описание.",
         assembling = "Собираю таблицу загрузки файлов. Пожалуйста, подождите.",
         startDownload = "Таблица загрузки файлов собрана. Начинаю загрузку.",
@@ -52,7 +52,7 @@ error = function(reason,...)
     io.write("\n")
     writeLog("[FATAL] " .. tostring(reason))
     local f = io.open("installerLogs.log","w")
-    f:write?(log1)
+    f:write(log1)
     f:close()
     print(languagePackages[language].error1:gsub("?","installerLogs.log"))
     print("\n\n\n\n")
@@ -162,7 +162,7 @@ end
 local function userSelect(list,showDescription)
     printIn(languagePackages[language].av1)
     for i = 1, #list do
-        printIn(tostring(i) .. ". " .. list[i].name .. (showDescription and (list[i].description and list[i].description[language]) or "")
+        printIn(tostring(i) .. ". " .. list[i].name .. (showDescription and (list[i].description and list[i].description[language]) or ""))
     end
     printIn(languagePackages[language][showDescription and "av0" or "av2"],true)
     while true do
@@ -202,7 +202,7 @@ while not language do
     local str = io.read()
     if not str then printIn("Exiting") os.exit() end
     local num = tonumber(str)
-    if num and num > 0 and num < #languages+! then
+    if num and num > 0 and num < #languages+1 then
         language = languages[num]
     else
         printIn("")
@@ -262,7 +262,7 @@ if installData.versionsList then
     end
 end
 printIn(languagePackages[language].startDownload)
-for path, urlOrType in pairs(installData)
+for path, urlOrType in pairs(installData) do
     if urlOrType == "DELETE" then
         fs.remove(path)
     else
