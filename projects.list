@@ -1,8 +1,24 @@
 {
   {name = "TabletOS",
     description = {eu_RU="ОС для планшетов.",eu_EN="OS for tabletpads"},
-    raw="https://raw.githubusercontent.com/HeroBrine1st/TabletOS/master/VERSIONS.txt",
-    script="https://raw.githubusercontent.com/HeroBrine1st/TabletOS/master/script.lua"},
+    channels={
+    	{name = "Experimental",
+    		filelist="https://raw.githubusercontent.com/HeroBrine1st/TabletOS/Experimental/filelist.lua",
+    		description={
+    			eu_RU="Канал обновлений с огромным количеством багов. Вас предупредили.",
+    			eu_EN="Update channel with a lot of bugs. You have been warned.",
+    		}
+    	},
+    	{name = "Stable",
+    		raw="https://raw.githubusercontent.com/HeroBrine1st/TabletOS/master/VERSIONS.txt",
+    		script="https://raw.githubusercontent.com/HeroBrine1st/TabletOS/master/script.lua",
+    		description={
+    			eu_RU="Стабильный канал обновлений. Подходит для обычных пользователей.",
+    			eu_EN="Stable update channel. Suitable for general users.",
+    		}
+    	},
+    }
+  },
   {name = "CryptedNote",
     description = {eu_RU="Утилита шифрования файлов с использованием сети Фейстеля",
       eu_EN="File Encryption Utility with the Feistel Network",},

@@ -1,0 +1,10 @@
+{
+  {name = "TabletOS",
+    description = {eu_RU="ОС для планшетов.",eu_EN="OS for tabletpads"},
+    raw="https://raw.githubusercontent.com/HeroBrine1st/TabletOS/master/VERSIONS.txt",
+    script="https://raw.githubusercontent.com/HeroBrine1st/TabletOS/master/script.lua"},
+  {name = "CryptedNote",
+    description = {eu_RU="Утилита шифрования файлов с использованием сети Фейстеля",
+      eu_EN="File Encryption Utility with the Feistel Network",},
+    raw="https://raw.githubusercontent.com/HeroBrine1st/CryptedNote/master/VERSIONS.txt"},
+}
