@@ -4,6 +4,8 @@ local fs = require "filesystem"
 local event = require "event"
 local unicode = require "unicode"
 local term = require "term"
+local text = require "text"
+local internet = component.internet
 local gpu = component.gpu
 local w,h = gpu.getResolution()
 local options = {
@@ -48,16 +50,14 @@ prevErr = error
 error = function(reason,...)
     gpu.setBackground(0x000000)
     gpu.setForeground(0xFFFFFF)
-    term.clear()
     io.write("\n")
     writeLog("[FATAL] " .. tostring(reason))
     local f = io.open("installerLogs.log","w")
     f:write(log1)
     f:close()
     print(languagePackages[language].error1:gsub("?","installerLogs.log"))
-    print("\n\n\n\n")
     error = prevErr
-    os.exit()
+    error(reason,...)
 end
 
 local function drawBar(progress,filename)
@@ -72,31 +72,11 @@ local function drawBar(progress,filename)
     gpu.fill(#str1+1,h,barLen,1,"⠶")
 end
 
-local function printIn(str,noWrap)
-    str = tostring(str)
-    local strTbl = string.wrap(str,w)
-    local cursorX, cursorY = term.getCursor()
-    for i = 1, #strTbl do
-        local line = strTbl[i]
-        gpu.set(cursorX,cursorY,line)
-        cursorX = unicode.len(line) + 1
-        if not noWrap then
-            cursorY = cursorY + 1
-            cursorX = 1
-            if cursorY == h-1 then
-                gpu.copy(1,1,w,h-1,0,-1)
-                gpu.fill(1,cursor.y,1,1," ")
-            end
-        end
-        term.setCursor(cursorX,cursorY)
-    end
-end
-
-local function write(str)
+local function write(text)
     local x, y = term.getCursor()
-    term.setCursor(1,y)
+    term.setCursor(1,y-1)
     term.clearLine()
-    printIn(text)
+    print(text)
 end
 
 local function shellProgressBar(file,progress,meta)
@@ -124,47 +104,43 @@ local function download(url,path,buff)
     local file, reason = io.open(path,"w")
     if not file then error("Error opening file for writing: " .. tostring(reason)) end
     shellProgressBar(name,-1)
-    local success, reqH = pcall(internet.request,url)
-    if success then
-        if reqH then
-            local resCode, resMsg, resData
-            while not resCode do
-                resCode, resMsg, resData = reqH:response()
+    local reqH = internet.request(url)
+    if reqH then
+        local resCode, resMsg, resData
+        while not resCode do
+            resCode, resMsg, resData = reqH:response()
+        end
+        shellProgressBar(name,-1,tostring(resCode) .. " " .. tostring(resMsg))
+        if resData and resData["Content-Length"] then
+            local contentLength = tonumber(resData["Content-Length"][1])
+            local downloadedLength = 0
+            local buffer = ""
+            while downloadedLength < contentLength do
+                local data, reason = reqH.read()
+                if not data and reason then reqH.close() error("Error downloading file: " .. tostring(reason)) end 
+                downloadedLength = downloadedLength + #data
+                file:write(data)
+                shellProgressBar(name,math.floor(downloadedLength/contentLength*100+0.5))
+                if buff then buffer = buffer .. data end
             end
-            shellProgressBar(file,-1,tostring(resCode) .. " " .. tostring(resMsg))
-            if resData and resData["Content-Length"] then
-                local contentLength = tonumber(resData["Content-Length"][1])
-                local downloadedLength = 0
-                local buffer = ""
-                while downloadedLength < contentLength do
-                    local data, reason = reqH.read()
-                    if not data and reason then reqH.close() error("Error downloading file: " .. tostring(reason)) end 
-                    downloadedLength = downloadedLength + #data
-                    file:write(data)
-                    shellProgressBar(name,math.floor(downloadedLength/contentLength*100+0.5))
-                    if buff then buffer = buffer .. data end
-                end
-                reqH.close()
-                file:close()
-                --gpu.fill(1,h,w,1," ")
-                if buff then return buffer end
-            else
-                error("Content-Length header absent.")
-            end
-        else 
-            error("Connection error: invalid URL address or server offline.")
+            reqH.close()
+            file:close()
+            gpu.fill(1,h,w,1," ")
+            if buff then return buffer end
+        else
+            error("Content-Length header absent.")
         end
     else
-        error(reqH)
+        error("Connection error: invalid URL address or server offline. URL: " .. tostring(url))
     end
 end
 
 local function userSelect(list,showDescription)
-    printIn(languagePackages[language].av1)
+    print(languagePackages[language].av1)
     for i = 1, #list do
-        printIn(tostring(i) .. ". " .. list[i].name .. (showDescription and (list[i].description and list[i].description[language]) or ""))
+        print(tostring(i) .. ". " .. list[i].name .. (showDescription and (list[i].description and " - " .. list[i].description[language]) or ""))
     end
-    printIn(languagePackages[language][showDescription and "av0" or "av2"],true)
+    io.write(languagePackages[language][showDescription and "av0" or "av2"])
     while true do
         local str = io.read()
         if not str then os.exit() end
@@ -175,38 +151,38 @@ local function userSelect(list,showDescription)
         end
         number = tonumber(str)
         if not number or number < 1 or number > #list then
-            printIn("")
-            printIn("Invalid input, try again:",true)
+            print("")
+            print("Invalid input, try again:")
         else
             if not descView then
                 return list[number],number
             else
-                printIn("")
-                printIn(list[number].description)
-                printIn(languagePackages[language][showDescription and "av0" or "av2"],true)
+                print("")
+                print(list[number].description)
+                io.write(languagePackages[language][showDescription and "av0" or "av2"])
             end
         end
     end
 end
 
 
-printIn("Select language:")
+print("Select language:")
 local languages = {}
 for key, value in pairs(languagePackages) do
     local langNum = #languages + 1
-    printIn(tostring(langNum) .. ": " .. tostring(value.full))
+    print(tostring(langNum) .. ": " .. tostring(value.full))
     languages[langNum] = key
 end
-printIn("Write a number for select language:", true)
+io.write("Write a number for select language:")
 while not language do
     local str = io.read()
-    if not str then printIn("Exiting") os.exit() end
+    if not str then print("Exiting") os.exit() end
     local num = tonumber(str)
     if num and num > 0 and num < #languages+1 then
         language = languages[num]
     else
-        printIn("")
-        printIn("Invalid input, try again:", true)
+        print("")
+        print("Invalid input, try again:")
     end
 end
 languages = nil
@@ -219,7 +195,7 @@ writeLog("Request project for install")
 local versionToInstall, versionNumber
 local projectToInstall = userSelect(projectsList,true)
 writeLog("Parsing project")
-local installData = {}
+local installData = {filelist={}}
 if projectToInstall.channels then
     local channel = userSelect(projectToInstall.channels,true)
     installData.script = channel.script
@@ -230,30 +206,33 @@ else
     installData.filelistUrl = projectToInstall.filelist
     installData.versionsList = projectToInstall.raw
 end
-printIn(languagePackages[language].assembling)
+print(languagePackages[language].assembling)
 
 local _i = 0
 local function parseFilelistUrl(url)
     _i = _i + 1
-    local filelist = download(filelistUrl,"/tmp/filelist" .. tostring(_i) .. ".list")
+    local filelist = download(url,"/tmp/filelist" .. tostring(_i) .. ".list",true)
     filelist = load("return " .. filelist)()
     for i = 1, #filelist do
         local url = filelist[i].url
         local path = filelist[i].path
         local _type = filelist[i].type
-        printIn("Adding " .. path)
+        print("Adding " .. path)
         if _type == "DELETE" then
             installData.filelist[path] = "DELETE"
         else
             installData.filelist[path] = url
         end
+        os.sleep(0.05)
     end
 end
-parseFilelistUrl(installData.filelistUrl)
+if installData.filelistUrl then
+    parseFilelistUrl(installData.filelistUrl)
+end
 if installData.versionsList then
     local versionsList = download(installData.versionsList,"/tmp/versions.list",true)
     versionsList = load("return " .. versionsList)()
-    versionToInstall = versionsList[#versionsList]
+    versionToInstall = versionsList[#versionsList].version
     versionNumber = #versionsList
     for i = 1, #versionsList do
         local version = versionsList[i]
@@ -261,19 +240,19 @@ if installData.versionsList then
         parseFilelistUrl(filelistUrl)
     end
 end
-printIn(languagePackages[language].startDownload)
-for path, urlOrType in pairs(installData) do
+print(languagePackages[language].startDownload)
+for path, urlOrType in pairs(installData.filelist) do
     if urlOrType == "DELETE" then
         fs.remove(path)
     else
-        download(path,urlOrType)
+        download(urlOrType,path)
     end
 end
 
 if installData.script then
-    printIn("")
-    printIn("Processing script")
-    local scriptCode = download(scriptRaw,"/tmp/script.lua",true)
+    print("")
+    print("Processing script")
+    local scriptCode = download(installData.script,"/tmp/script.lua",true)
     local scriptF, reason = load(scriptCode)
     if not scriptF then error(reason) end
     scriptF(tostring(versionToInstall),versionNumber)
