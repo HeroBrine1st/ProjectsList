@@ -202,3 +202,4 @@ while not projectToInstall do
         projectToInstall = projectsList[number]
     end
 end
+
