@@ -19,7 +19,7 @@ local languagePackages = {
         downloading = "DOWNLOADING",
         downloadDone = "Download done",
         av1 = "Avaliable to install:",
-        av0 = "Write a number for install."
+        av0 = "Write a number for install.",
         av2 = "Write a number for install. Enter \"d\" before number for see description:",
         assembling = "Assembling filelist. Please wait.",
         startDownload = "Filelist assembling done. Starting download.",
@@ -73,6 +73,7 @@ local function drawBar(progress,filename)
 end
 
 local function printIn(str,noWrap)
+    str = tostring(str)
     local strTbl = string.wrap(str,w)
     local cursorX, cursorY = term.getCursor()
     for i = 1, #strTbl do
@@ -158,6 +159,37 @@ local function download(url,path,buff)
     end
 end
 
+local function userSelect(list,showDescription)
+    printIn(languagePackages[language].av1)
+    for i = 1, #list do
+        printIn(tostring(i) .. ". " .. list[i].name .. (showDescription and (list[i].description and list[i].description[language]) or "")
+    end
+    printIn(languagePackages[language][showDescription and "av0" or "av2"],true)
+    while true do
+        local str = io.read()
+        if not str then os.exit() end
+        local descView = false
+        if str[1] == "d" then
+            str = str:sub(2)
+            descView = true
+        end
+        number = tonumber(str)
+        if not number or number < 1 or number > #list then
+            printIn("")
+            printIn("Invalid input, try again:",true)
+        else
+            if not descView then
+                return list[number]
+            else
+                printIn("")
+                printIn(list[number].description)
+                printIn(languagePackages[language][showDescription and "av0" or "av2"],true)
+            end
+        end
+    end
+end
+
+
 printIn("Select language:")
 local languages = {}
 for key, value in pairs(languagePackages) do
@@ -179,27 +211,49 @@ while not language do
 end
 languages = nil
 
-local projectsList = download(prorepties.projectsListUrl,"/tmp/projects.list",true)
+local projectsList = download(options.projectsListUrl,"/tmp/projects.list",true)
 local projects,reason = load("return " .. projectsList)
 if not projects then error(reason) end
 projectsList = projects()
 writeLog("Request project for install")
-print(languagePackages[language].av1)
-for i = 1, #projectsList do
-    print(tostring(i) .. ". " .. projectsList[i].name .. (projectsList[i].description and ": " .. projects[i].description[language]) or "")
+local projectToInstall = userSelect(projectsList,true)
+writeLog("Parsing project")
+local installData = {}
+if projectToInstall.channels then
+    local channel = userSelect(projectToInstall.channels,true)
+    installData.script = channel.script
+    installData.filelistUrl = channel.filelist
+    installData.versionsList = channel.raw
+else
+    installData.script = projectToInstall.script
+    installData.filelistUrl = projectToInstall.filelist
+    installData.versionsList = projectToInstall.raw
 end
-io.write(languagePackages[language].av0)
+printIn(languagePackages[language].assembling)
 
-local projectToInstall
-while not projectToInstall do
-    local str = io.read()
-    if not str then os.exit() end
-    number = tonumber(str)
-    if not number or number < 1 or number > #projectsList then
-        printIn("")
-        printIn("Invalid input, try again:",true) 
-    else
-        projectToInstall = projectsList[number]
+local _i = 0
+local function parseFilelistUrl(url)
+    _i = _i + 1
+    local filelist = download(filelistUrl,"/tmp/filelist" .. tostring(_i) .. ".list")
+    filelist = load("return " .. filelist)()
+    for i = 1, #filelist do
+        local url = filelist[i].url
+        local path = filelist[i].path
+        local _type = filelist[i].type
+        if _type == "DELETE" then
+            installData.filelist[path] = "DELETE"
+        else
+            installData.filelist[path] = url
+        end
     end
 end
-
+parseFilelistUrl(installData.filelistUrl)
+if installData.versionsList then
+    local versionsList = download(installData.versionsList,"/tmp/versions.list",true)
+    versionsList = load("return " .. versionsList)()
+    for i = 1, #versionsList do
+        local version = versionsList[i]
+        local filelistUrl = version.raw or version.filelistUrl
+        parseFilelistUrl(filelistUrl)
+    end
+end
