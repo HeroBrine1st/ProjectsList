@@ -143,21 +143,21 @@ local function userSelect(list,showDescription)
     io.write(languagePackages[language][showDescription and "av0" or "av2"])
     while true do
         local str = io.read()
-        if not str then os.exit() end
+        if not str then print("Exiting") error=prevErr os.exit() end
         local descView = false
-        if str[1] == "d" then
-            str = str:sub(2)
+        if str:sub(1,1) == "d" then
             descView = true
+            number = tonumber(str:sub(2,-1))
+        else
+            number = tonumber(str)
         end
-        number = tonumber(str)
         if not number or number < 1 or number > #list then
             io.write("Invalid input, try again:")
         else
             if not descView then
                 return list[number],number
             else
-                print("")
-                print(list[number].description)
+                print(list[number].description[language])
                 io.write(languagePackages[language][showDescription and "av0" or "av2"])
             end
         end
@@ -175,7 +175,7 @@ end
 io.write("Write a number for select language:")
 while not language do
     local str = io.read()
-    if not str then print("Exiting") os.exit() end
+    if not str then print("Exiting") error=prevErr os.exit() end
     local num = tonumber(str)
     if num and num > 0 and num < #languages+1 then
         language = languages[num]

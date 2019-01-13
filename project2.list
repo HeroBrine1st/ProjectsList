@@ -5,16 +5,16 @@
     	{name = "Experimental",
     		filelist="https://raw.githubusercontent.com/HeroBrine1st/TabletOS/Experimental/filelist.lua",
     		description={
-    			eu_RU="Канал обновлений с огромным количеством багов",
-    			eu_EN="Update channel with a lot of bugs"
+    			eu_RU="Канал обновлений с огромным количеством багов. Вас предупредили.",
+    			eu_EN="Update channel with a lot of bugs. You have been warned.",
     		}
     	},
     	{name = "Stable",
     		raw="https://raw.githubusercontent.com/HeroBrine1st/TabletOS/master/VERSIONS.txt",
     		script="https://raw.githubusercontent.com/HeroBrine1st/TabletOS/master/script.lua",
     		description={
-    			eu_RU="Стабильный канал обновлений",
-    			eu_EN="Stable update channel"
+    			eu_RU="Стабильный канал обновлений. Подходит для обычных пользователей.",
+    			eu_EN="Stable update channel. Suitable for general users.",
     		}
     	},
     }
