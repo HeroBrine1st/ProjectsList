@@ -179,7 +179,7 @@ local function userSelect(list,showDescription)
             printIn("Invalid input, try again:",true)
         else
             if not descView then
-                return list[number]
+                return list[number],number
             else
                 printIn("")
                 printIn(list[number].description)
@@ -216,6 +216,7 @@ local projects,reason = load("return " .. projectsList)
 if not projects then error(reason) end
 projectsList = projects()
 writeLog("Request project for install")
+local versionToInstall, versionNumber
 local projectToInstall = userSelect(projectsList,true)
 writeLog("Parsing project")
 local installData = {}
@@ -240,6 +241,7 @@ local function parseFilelistUrl(url)
         local url = filelist[i].url
         local path = filelist[i].path
         local _type = filelist[i].type
+        printIn("Adding " .. path)
         if _type == "DELETE" then
             installData.filelist[path] = "DELETE"
         else
@@ -251,9 +253,32 @@ parseFilelistUrl(installData.filelistUrl)
 if installData.versionsList then
     local versionsList = download(installData.versionsList,"/tmp/versions.list",true)
     versionsList = load("return " .. versionsList)()
+    versionToInstall = versionsList[#versionsList]
+    versionNumber = #versionsList
     for i = 1, #versionsList do
         local version = versionsList[i]
         local filelistUrl = version.raw or version.filelistUrl
         parseFilelistUrl(filelistUrl)
     end
 end
+printIn(languagePackages[language].startDownload)
+for path, urlOrType in pairs(installData)
+    if urlOrType == "DELETE" then
+        fs.remove(path)
+    else
+        download(path,urlOrType)
+    end
+end
+
+if installData.script then
+    printIn("")
+    printIn("Processing script")
+    local scriptCode = download(scriptRaw,"/tmp/script.lua",true)
+    local scriptF, reason = load(scriptCode)
+    if not scriptF then error(reason) end
+    scriptF(tostring(versionToInstall),versionNumber)
+end
+error = prevErr
+io.write(languagePackages[language].whatstreboot)
+local str = io.read()
+if str:sub(1,1):lower() == "y" then require("computer").shutdown(true) end
