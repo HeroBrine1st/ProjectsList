@@ -151,8 +151,7 @@ local function userSelect(list,showDescription)
         end
         number = tonumber(str)
         if not number or number < 1 or number > #list then
-            print("")
-            print("Invalid input, try again:")
+            io.write("Invalid input, try again:")
         else
             if not descView then
                 return list[number],number

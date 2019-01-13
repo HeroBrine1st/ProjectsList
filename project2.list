@@ -2,8 +2,21 @@
   {name = "TabletOS",
     description = {eu_RU="ОС для планшетов.",eu_EN="OS for tabletpads"},
     channels={
-    	{name = "Experimental",filelist="https://raw.githubusercontent.com/HeroBrine1st/TabletOS/Experimental/filelist.lua"},
-    	{name = "Stable",raw="https://raw.githubusercontent.com/HeroBrine1st/TabletOS/master/VERSIONS.txt",script="https://raw.githubusercontent.com/HeroBrine1st/TabletOS/master/script.lua"},
+    	{name = "Experimental",
+    		filelist="https://raw.githubusercontent.com/HeroBrine1st/TabletOS/Experimental/filelist.lua",
+    		description={
+    			eu_RU="Канал обновлений с огромным количеством багов",
+    			eu_EN="Update channel with a lot of bugs"
+    		}
+    	},
+    	{name = "Stable",
+    		raw="https://raw.githubusercontent.com/HeroBrine1st/TabletOS/master/VERSIONS.txt",
+    		script="https://raw.githubusercontent.com/HeroBrine1st/TabletOS/master/script.lua",
+    		description={
+    			eu_RU="Стабильный канал обновлений",
+    			eu_EN="Stable update channel"
+    		}
+    	},
     }
   },
   {name = "CryptedNote",
