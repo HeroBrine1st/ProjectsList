@@ -5,8 +5,8 @@
     	{name = "Experimental",
     		filelist="https://raw.githubusercontent.com/HeroBrine1st/TabletOS/Experimental/filelist.lua",
     		description={
-    			eu_RU="Канал обновлений с огромным количеством багов. Вас предупредили.",
-    			eu_EN="Update channel with a lot of bugs. You have been warned.",
+    			eu_RU="Канал обновлений раннего доступа.",
+    			eu_EN="Early Access Update Channel.",
     		}
     	},
     	{name = "Stable",
