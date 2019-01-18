@@ -10,6 +10,7 @@ local gpu = component.gpu
 local w,h = gpu.getResolution()
 local options = {
     projectsListUrl = "https://raw.githubusercontent.com/HeroBrine1st/UniversalInstaller/master/projects.list",
+    circleBarSymbols = {"\\","|","/","—"}
 }
 
 local language
@@ -81,13 +82,16 @@ end
 
 local function shellProgressBar(file,progress,meta)
     local text1 = ""
+    local symbolIndex = math.floor(computer.uptime()*4)%3 + 1
+    local symbol = options.circleBarSymbols[symbolIndex]
     if progress == -1 then 
         text1 = file .. ": 0%   " .. languagePackages[language].connecting
         if meta then
             text1 = file .. ": 0%   " .. tostring(meta)
         end
+        text1 = text1 .. " " .. symbol
     elseif progress >= 0 and progress < 100 then
-        text1 = file .. ": " .. text.padRight(tostring(progress) .. "%",4) .. " " .. languagePackages[language].downloading
+        text1 = file .. ": " .. text.padRight(tostring(progress) .. "%",4) .. " " .. languagePackages[language].downloading .. " " .. symbol
     elseif progress == 100 then
         text1 = file .. ": 100% " .. languagePackages[language].downloadDone
     end
@@ -191,19 +195,23 @@ local projects,reason = load("return " .. projectsList)
 if not projects then error(reason) end
 projectsList = projects()
 writeLog("Request project for install")
-local versionToInstall, versionNumber
+local versionToInstall, versionNumber,versionChannel
 local projectToInstall = userSelect(projectsList,true)
 writeLog("Parsing project")
 local installData = {filelist={}}
 if projectToInstall.channels then
-    local channel = userSelect(projectToInstall.channels,true)
+    local channel,index = userSelect(projectToInstall.channels,true)
+    versionChannel = channel.name
+    channelIndex = index
     installData.script = channel.script
     installData.filelistUrl = channel.filelist
     installData.versionsList = channel.raw
+    installData.scriptVersion = channel.scriptVersion or 1
 else
     installData.script = projectToInstall.script
     installData.filelistUrl = projectToInstall.filelist
     installData.versionsList = projectToInstall.raw
+    installData.scriptVersion = projectToInstall.scriptVersion or 1
 end
 print(languagePackages[language].assembling)
 
@@ -254,7 +262,14 @@ if installData.script then
     local scriptCode = download(installData.script,"/tmp/script.lua",true)
     local scriptF, reason = load(scriptCode)
     if not scriptF then error(reason) end
-    scriptF(tostring(versionToInstall),versionNumber)
+    if installData.scriptVersion == 1 then
+        scriptF(tostring(versionToInstall),versionNumber,versionChannel)
+    else
+        scriptF({
+            version = {name=versionToInstall,index=versionNumber},
+            channel = {name=versionChannel,index=channelIndex},
+        })
+    end
 end
 error = prevErr
 io.write(languagePackages[language].whatstreboot)
