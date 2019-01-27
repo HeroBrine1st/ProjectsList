@@ -263,12 +263,12 @@ if installData.script then
     local scriptF, reason = load(scriptCode)
     if not scriptF then error(reason) end
     if installData.scriptVersion == 1 then
-        scriptF(tostring(versionToInstall),versionNumber,versionChannel)
-    else
         scriptF({
-            version = {name=versionToInstall,index=versionNumber},
+            version = {name=versionToInstall,index=versionNumber,build=installData.filelist.build},
             channel = {name=versionChannel,index=channelIndex},
         })
+    else
+        scriptF(tostring(versionToInstall),versionNumber,versionChannel)
     end
 end
 error = prevErr
