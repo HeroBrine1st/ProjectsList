@@ -243,8 +243,10 @@ if installData.versionsList then
     versionNumber = #versionsList
     for i = 1, #versionsList do
         local version = versionsList[i]
-        local filelistUrl = version.raw or version.filelistUrl
-        parseFilelistUrl(filelistUrl)
+        if not version.exp then
+            local filelistUrl = version.raw or version.filelistUrl
+            parseFilelistUrl(filelistUrl)
+        end
     end
 end
 print(languagePackages[language].startDownload)
