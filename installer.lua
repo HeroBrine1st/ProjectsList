@@ -206,12 +206,12 @@ if projectToInstall.channels then
     installData.script = channel.script
     installData.filelistUrl = channel.filelist
     installData.versionsList = channel.raw
-    installData.scriptVersion = channel.scriptVersion or 1
+    installData.scriptVersion = channel.scriptVersion or "1"
 else
     installData.script = projectToInstall.script
     installData.filelistUrl = projectToInstall.filelist
     installData.versionsList = projectToInstall.raw
-    installData.scriptVersion = projectToInstall.scriptVersion or 1
+    installData.scriptVersion = projectToInstall.scriptVersion or "1"
 end
 print(languagePackages[language].assembling)
 
@@ -232,6 +232,7 @@ local function parseFilelistUrl(url)
         end
         os.sleep(0.05)
     end
+    if filelist.build then installData.filelist.build = filelist.build end
 end
 if installData.filelistUrl then
     parseFilelistUrl(installData.filelistUrl)
@@ -251,10 +252,12 @@ if installData.versionsList then
 end
 print(languagePackages[language].startDownload)
 for path, urlOrType in pairs(installData.filelist) do
-    if urlOrType == "DELETE" then
-        fs.remove(path)
-    else
-        download(urlOrType,path)
+    if path ~= "build" then
+        if urlOrType == "DELETE" then
+            fs.remove(path)
+        else
+            download(urlOrType,path)
+        end
     end
 end
 
@@ -264,13 +267,13 @@ if installData.script then
     local scriptCode = download(installData.script,"/tmp/script.lua",true)
     local scriptF, reason = load(scriptCode)
     if not scriptF then error(reason) end
-    if installData.scriptVersion == 1 then
-        scriptF({
-            version = {name=versionToInstall,index=versionNumber,build=installData.filelist.build},
-            channel = {name=versionChannel,index=channelIndex},
-        })
-    else
+    if installData.scriptVersion == "1" then
         scriptF(tostring(versionToInstall),versionNumber,versionChannel)
+    elseif installData.scriptVersion == "1.01" then
+        scriptF({
+            channel = {name=versionChannel,index=channelIndex}}),
+            filelist = installData.filelist
+        })
     end
 end
 error = prevErr
