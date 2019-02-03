@@ -271,7 +271,7 @@ if installData.script then
         scriptF(tostring(versionToInstall),versionNumber,versionChannel)
     elseif installData.scriptVersion == "1.01" then
         scriptF({
-            channel = {name=versionChannel,index=channelIndex}},
+            channel = {name=versionChannel,index=channelIndex},
             filelist = installData.filelist
         })
     end
