@@ -263,7 +263,7 @@ end
 
 if installData.script then
     print("")
-    print("Processing script")
+    print("Processing script. Version: " .. tostring(installData.scriptVersion))
     local scriptCode = download(installData.script,"/tmp/script.lua",true)
     local scriptF, reason = load(scriptCode)
     if not scriptF then error(reason) end
