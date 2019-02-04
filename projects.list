@@ -2,6 +2,14 @@
   {name = "TabletOS",
     description = {eu_RU="ОС для планшетов.",eu_EN="OS for tabletpads"},
     channels={
+    	{name = "Stable",
+    		raw="https://raw.githubusercontent.com/HeroBrine1st/TabletOS/master/VERSIONS.txt",
+    		script="https://raw.githubusercontent.com/HeroBrine1st/TabletOS/master/script.lua",
+    		description={
+    			eu_RU="Стабильный канал обновлений. Подходит для обычных пользователей.",
+    			eu_EN="Stable update channel. Suitable for general users.",
+    		}
+    	},
     	{name = "Experimental",
     		filelist="https://raw.githubusercontent.com/HeroBrine1st/TabletOS/Experimental/filelist.lua",
     		description={
@@ -10,14 +18,6 @@
     		},
         script = "https://raw.githubusercontent.com/HeroBrine1st/TabletOS/Experimental-(meta)/installerScript.lua",
         scriptVersion = "1.01",
-    	},
-    	{name = "Stable",
-    		raw="https://raw.githubusercontent.com/HeroBrine1st/TabletOS/master/VERSIONS.txt",
-    		script="https://raw.githubusercontent.com/HeroBrine1st/TabletOS/master/script.lua",
-    		description={
-    			eu_RU="Стабильный канал обновлений. Подходит для обычных пользователей.",
-    			eu_EN="Stable update channel. Suitable for general users.",
-    		}
     	},
     }
   },
