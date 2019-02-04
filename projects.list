@@ -7,7 +7,9 @@
     		description={
     			eu_RU="Канал обновлений раннего доступа.",
     			eu_EN="Early Access Update Channel.",
-    		}
+    		},
+        script = "https://raw.githubusercontent.com/HeroBrine1st/TabletOS/Experimental-(meta)/installerScript.lua",
+        scriptversion = "1.01",
     	},
     	{name = "Stable",
     		raw="https://raw.githubusercontent.com/HeroBrine1st/TabletOS/master/VERSIONS.txt",
