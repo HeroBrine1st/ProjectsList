@@ -11,7 +11,7 @@
     		}
     	},
     	{name = "Experimental",
-    		filelist="https://raw.githubusercontent.com/HeroBrine1st/TabletOS/Experimental/filelist.lua",
+    		filelist="https://raw.githubusercontent.com/HeroBrine1st/TabletOS/Experimental-(meta)/filelist.lua",
     		description={
     			eu_RU="Канал обновлений раннего доступа.",
     			eu_EN="Early Access Update Channel.",
