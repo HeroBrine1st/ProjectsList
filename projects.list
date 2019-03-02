@@ -3,8 +3,9 @@
     description = {eu_RU="ОС для планшетов.",eu_EN="OS for tabletpads"},
     channels={
     	{name = "Stable",
-    		raw="https://raw.githubusercontent.com/HeroBrine1st/TabletOS/master/VERSIONS.txt",
-    		script="https://raw.githubusercontent.com/HeroBrine1st/TabletOS/master/script.lua",
+    		filelist="https://raw.githubusercontent.com/HeroBrine1st/TabletOS/Stable-(meta)/filelist.lua",
+    		script="https://raw.githubusercontent.com/HeroBrine1st/TabletOS/Stable-(meta)/installerScript.lua",
+				scriptVersion = "1.01",
     		description={
     			eu_RU="Стабильный канал обновлений. Подходит для обычных пользователей.",
     			eu_EN="Stable update channel. Suitable for general users.",

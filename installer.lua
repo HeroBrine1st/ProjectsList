@@ -239,7 +239,7 @@ if installData.filelistUrl then
 end
 if installData.versionsList then
     local versionsList = download(installData.versionsList,"/tmp/versions.list",true)
-    versionsList = load("return " .. versionsList)()
+    versionsList = assert(load("return " .. versionsList))()
     versionToInstall = versionsList[#versionsList].version
     versionNumber = #versionsList
     for i = 1, #versionsList do
