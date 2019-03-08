@@ -26,4 +26,8 @@
     description = {eu_RU="Утилита шифрования файлов с использованием сети Фейстеля",
       eu_EN="File Encryption Utility with the Feistel Network",},
     raw="https://raw.githubusercontent.com/HeroBrine1st/CryptedNote/master/VERSIONS.txt"},
+    {name="[LIBRARY] RSA",
+    description = {eu_RU="Библиотека RSA",eu_EN="RSA Library"},
+    filelist="https://raw.githubusercontent.com/HeroBrine1st/RSA/master/filelist.lua",
+    },
 }
