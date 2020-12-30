@@ -30,4 +30,6 @@
     description = {eu_RU="Библиотека RSA",eu_EN="RSA Library"},
     filelist="https://raw.githubusercontent.com/HeroBrine1st/RSA/master/filelist.lua",
     },
+  {name="Lukyt JVM (by zenith391)", description={eu_RU="JVM 1.5", eu_EN="JVM 1.5"},
+   filelist="https://raw.githubusercontent.com/HeroBrine1st/lukyt/master/files.lua",}
 }
